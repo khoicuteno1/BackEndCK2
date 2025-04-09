@@ -4,7 +4,7 @@ const mysql = require('mysql2/promise'); // Import mysql2 để kết nối MySQ
 const connection = mysql.createPool({
   host: "mysql-3d6d342f-huynhkhoi2002123-e6a2.k.aivencloud.com", // Địa chỉ MySQL của bạn
   user: "avnadmin", // Tên người dùng của MySQL
-  password: process.env.DB_PASSWORD, // Mật khẩu người dùng
+  password: "AVNS_8pbTDsiPb0wb3sZx_YB", // Mật khẩu người dùng
   database: "defaultdb", // Tên cơ sở dữ liệu
   port: 20053, // Cổng của MySQL
   ssl: {
