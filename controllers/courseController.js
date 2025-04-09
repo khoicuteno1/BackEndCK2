@@ -32,7 +32,7 @@ const getAllCourses = async (req, res) => {
 // Thêm khóa học
 const addCourse = async (req, res) => {
   const { courseName, description, credits, semester, departmentId } = req.body;
-  const query = 'INSERT INTO courses (courseName, description, credits, semester, departmentId) VALUES (?, ?, ?, ?, ?)';
+  const query = 'INSERT INTO courses (courseName, credits, semester, departmentId) VALUES (?, ?, ?, ?, ?)';
   
   try {
     const [results] = await connection.query(query, [courseName, description, credits, semester, departmentId]);
