@@ -4,7 +4,7 @@ const mysql = require('mysql2/promise'); // Import mysql2 để kết nối MySQ
 const connection = mysql.createPool({
   host: "mysql-3d6d342f-huynhkhoi2002123-e6a2.k.aivencloud.com", // Địa chỉ MySQL của bạn
   user: "avnadmin", // Tên người dùng của MySQL
-  password: process.env.DB_PASSWORD, // Mật khẩu người dùng
+  password:"AVNS_8pbTDsiPb0wb3sZx_YB", // Mật khẩu người dùng
   database: "defaultdb", // Tên cơ sở dữ liệu
   port: 20053, // Cổng của MySQL
   ssl: {
@@ -55,18 +55,37 @@ const updateDepartment = async (req, res) => {
 // Xóa phòng ban
 const deleteDepartment = async (req, res) => {
   const { id } = req.params;
-  const query = 'DELETE FROM departments WHERE id = ?';
+
   try {
-    const [results] = await connection.query(query, [id]);
-    if (results.affectedRows === 0) {
-      return res.status(404).json({ message: 'Department not found' });
+    // Kiểm tra xem có course nào thuộc department này không
+    const [courseCheck] = await connection.query(
+      'SELECT COUNT(*) AS count FROM courses WHERE departmentId = ?',
+      [id]
+    );
+
+    if (courseCheck[0].count > 0) {
+      return res.status(400).json({
+        message: 'Không thể xóa phòng ban này vì vẫn còn khóa học trực thuộc.'
+      });
     }
-    res.status(200).json({ message: 'Department deleted successfully' });
+
+    // Nếu không có course -> cho phép xóa department
+    const [result] = await connection.query(
+      'DELETE FROM departments WHERE id = ?',
+      [id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Phòng ban không tồn tại.' });
+    }
+
+    res.status(200).json({ message: 'Xóa phòng ban thành công.' });
   } catch (err) {
     console.error('Lỗi khi xóa phòng ban:', err);
-    return res.status(500).json({ message: 'Internal Server Error' });
+    res.status(500).json({ message: 'Lỗi máy chủ nội bộ.' });
   }
 };
+
 
 module.exports = {
   getAllDepartments,

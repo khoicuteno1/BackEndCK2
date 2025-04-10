@@ -9,7 +9,6 @@ const mysql = require('mysql2/promise'); // Import mysql2 để kết nối MySQ
 
 const cors = require('cors');
 require('dotenv').config(); // Nạp biến môi trường từ .env
-
 const app = express();
 const port = 3030;
 

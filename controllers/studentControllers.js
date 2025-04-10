@@ -3,7 +3,7 @@ const mysql = require('mysql2/promise'); // Import mysql2 để kết nối MySQ
 const connection = mysql.createPool({
   host: "mysql-3d6d342f-huynhkhoi2002123-e6a2.k.aivencloud.com", // Địa chỉ MySQL của bạn
   user: "avnadmin", // Tên người dùng của MySQL
-  password: process.env.DB_PASSWORD, // Mật khẩu người dùng
+  password:"AVNS_8pbTDsiPb0wb3sZx_YB", // Mật khẩu người dùng
   database: "defaultdb", // Tên cơ sở dữ liệu
   port: 20053, // Cổng của MySQL
   ssl: {
@@ -61,19 +61,41 @@ const updateStudent = async (req, res) => {
   const { firstName, lastName, dateOfBirth, gender, address, phoneNumber, email } = req.body;
 
   try {
-    const query = 'UPDATE students SET firstName = ?, lastName = ?, dateOfBirth = ?, gender = ?, address = ?, phoneNumber = ?, email = ?, updatedAt = NOW() WHERE id = ?';
-    const values = [firstName, lastName, dateOfBirth, gender, address, phoneNumber, email, id];
+    // 🔧 Chuyển định dạng dateOfBirth từ ISO sang DATETIME
+    const formattedDateOfBirth = new Date(dateOfBirth).toISOString().slice(0, 19).replace('T', ' ');
+
+    const query = `
+      UPDATE students 
+      SET firstName = ?, lastName = ?, dateOfBirth = ?, gender = ?, 
+          address = ?, phoneNumber = ?, email = ?, updatedAt = NOW() 
+      WHERE id = ?
+    `;
+    
+    const values = [
+      firstName,
+      lastName,
+      formattedDateOfBirth, // ✅ dùng định dạng đúng cho DATETIME
+      gender,
+      address,
+      phoneNumber,
+      email,
+      id
+    ];
 
     const [result] = await connection.query(query, values);
+
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: 'Sinh viên không tồn tại' });
     }
+
     res.status(200).json({ message: 'Cập nhật sinh viên thành công' });
+
   } catch (error) {
     console.error('Lỗi khi cập nhật sinh viên:', error);
     res.status(500).json({ message: 'Lỗi server' });
   }
 };
+
 
 module.exports = {
   getAllStudents,

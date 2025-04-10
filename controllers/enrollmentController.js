@@ -4,7 +4,7 @@ const mysql = require('mysql2/promise'); // Import mysql2 để kết nối MySQ
 const connection = mysql.createPool({
   host: "mysql-3d6d342f-huynhkhoi2002123-e6a2.k.aivencloud.com", // Địa chỉ MySQL của bạn
   user: "avnadmin", // Tên người dùng của MySQL
-  password: process.env.DB_PASSWORD, // Mật khẩu người dùng
+  password: "AVNS_8pbTDsiPb0wb3sZx_YB", // Mật khẩu người dùng
   database: "defaultdb", // Tên cơ sở dữ liệu
   port: 20053, // Cổng của MySQL
   ssl: {
@@ -39,8 +39,18 @@ const addEnrollment = async (req, res) => {
   const { studentId, courseId, semester, enrollDate } = req.body;
 
   try {
+    // Kiểm tra xem đã tồn tại bản ghi tương tự chưa
+const [existing] = await connection.query(
+  'SELECT * FROM enrollments WHERE studentId = ? AND courseId = ? AND semester = ?',
+  [studentId, courseId, semester]
+);
+
+if (existing.length > 0) {
+  return res.status(400).json({ message: 'Sinh viên đã ghi danh môn học này trong học kỳ này.' });
+}
+
     const query = `
-      INSERT INTO Enrollments (studentId, courseId, semester, enrollDate, createdAt, updatedAt)
+      INSERT INTO enrollments (studentId, courseId, semester, enrollDate, createdAt, updatedAt)
       VALUES (?, ?, ?, ?, NOW(), NOW())
     `;
     const values = [studentId, courseId, semester, enrollDate];
@@ -60,7 +70,7 @@ const updateEnrollment = async (req, res) => {
 
   try {
     const query = `
-      UPDATE Enrollments
+      UPDATE enrollments
       SET grade = ?, updatedAt = NOW()
       WHERE id = ?
     `;
@@ -84,7 +94,7 @@ const deleteEnrollment = async (req, res) => {
 
   try {
     // Sử dụng async/await để thực hiện truy vấn
-    const [result] = await connection.query('DELETE FROM Enrollments WHERE id = ?', [id]);
+    const [result] = await connection.query('DELETE FROM enrollments WHERE id = ?', [id]);
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: 'Ghi danh không tồn tại' });
     }
